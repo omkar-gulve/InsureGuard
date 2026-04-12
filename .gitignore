@@ -1,0 +1,24 @@
+# Node.js
+node_modules/
+dist/
+.eslintcache
+
+# Python
+backend/venv/
+backend/__pycache__/
+*.pyc
+
+# Local Database
+backend/claims.db
+
+# IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environment Files
+.env
+.env.local
