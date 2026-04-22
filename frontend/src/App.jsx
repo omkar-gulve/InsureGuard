@@ -13,6 +13,7 @@ const PredictPremium = lazy(() => import('./pages/PredictPremium'));
 const Settings     = lazy(() => import('./pages/Settings'));
 const ClaimsHistory = lazy(() => import('./pages/ClaimsHistory'));
 const Reports      = lazy(() => import('./pages/Reports'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
 const Layout       = lazy(() => import('./components/layout/Layout'));
 
 // ── Full-page spinner shown during lazy chunk loading ──
@@ -66,6 +67,7 @@ function AppRoutes() {
           <Route path="predict-premium" element={<PredictPremium />} />
           <Route path="claims"         element={<ClaimsHistory />} />
           <Route path="reports"        element={<Reports />} />
+          <Route path="user-management" element={<UserManagement />} />
           <Route path="settings"       element={<Settings />} />
         </Route>
       </Routes>

@@ -16,6 +16,10 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(RoleEnum), default=RoleEnum.agent, nullable=False)
     
+    full_name = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
+    profile_image_url = Column(String, nullable=True)
+    
     claims = relationship("Claim", back_populates="agent", cascade="all, delete-orphan")
 
 class Claim(Base):

@@ -6,11 +6,11 @@ import {
   AlertTriangle, FileText, Users, DollarSign, Car, Eye
 } from 'lucide-react';
 
-const severityOptions = ['Trivial Damage', 'Minor Damage', 'Major Damage', 'Total Loss'];
 const yesNoOptions = ['YES', 'NO', '?'];
+const incidentTypeOptions = ['Single Vehicle Collision', 'Vehicle Theft', 'Multi-vehicle Collision', 'Parked Car'];
+const incidentSeverityOptions = ['Major Damage', 'Minor Damage', 'Total Loss', 'Trivial Damage'];
 
 const riskFactors = [
-  { label: 'Total Loss severity', impact: 'High', color: 'var(--danger)' },
   { label: 'No police report', impact: 'Medium', color: 'var(--warning)' },
   { label: 'Multiple bodily injuries', impact: 'High', color: 'var(--danger)' },
   { label: 'High claim-to-premium ratio', impact: 'High', color: 'var(--danger)' },
@@ -36,9 +36,11 @@ const FormField = ({ label, icon: Icon, children }) => (
 const PredictFraud = () => {
   const [formData, setFormData] = useState({
     policy_number: `POL-${Math.floor(Math.random() * 90000) + 10000}`,
-    incident_severity: 'Minor Damage',
     total_claim_amount: '',
     months_as_customer: '',
+    incident_type: 'Single Vehicle Collision',
+    incident_severity: 'Minor Damage',
+    property_damage: 'NO',
     police_report_available: 'NO',
     witnesses: '0',
     bodily_injuries: '0',
@@ -61,7 +63,9 @@ const PredictFraud = () => {
     setLoading(true); setResult(null); setError(''); setSaveStatus('');
     try {
       const payload = {
+        incident_type: formData.incident_type,
         incident_severity: formData.incident_severity,
+        property_damage: formData.property_damage,
         total_claim_amount: parseFloat(formData.total_claim_amount),
         months_as_customer: parseInt(formData.months_as_customer),
         police_report_available: formData.police_report_available,
@@ -155,12 +159,6 @@ const PredictFraud = () => {
                   />
                 </FormField>
 
-                <FormField label="Incident Severity" icon={AlertTriangle}>
-                  <select name="incident_severity" value={formData.incident_severity} onChange={handleChange} className="form-input cursor-pointer">
-                    {severityOptions.map(o => <option key={o}>{o}</option>)}
-                  </select>
-                </FormField>
-
                 <FormField label="Total Claim Amount ($)" icon={DollarSign}>
                   <input type="number" required name="total_claim_amount" placeholder="e.g. 65,000"
                     className="form-input" value={formData.total_claim_amount} onChange={handleChange} />
@@ -190,6 +188,24 @@ const PredictFraud = () => {
                 <FormField label="Bodily Injuries Reported" icon={Users}>
                   <input type="number" required name="bodily_injuries" min="0" placeholder="0 or more"
                     className="form-input" value={formData.bodily_injuries} onChange={handleChange} />
+                </FormField>
+
+                <FormField label="Damage Type" icon={Car}>
+                  <select name="incident_type" value={formData.incident_type} onChange={handleChange} className="form-input cursor-pointer">
+                    {incidentTypeOptions.map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </FormField>
+
+                <FormField label="Incident Severity" icon={ShieldAlert}>
+                  <select name="incident_severity" value={formData.incident_severity} onChange={handleChange} className="form-input cursor-pointer">
+                    {incidentSeverityOptions.map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </FormField>
+
+                <FormField label="Property Damage" icon={Car}>
+                  <select name="property_damage" value={formData.property_damage} onChange={handleChange} className="form-input cursor-pointer">
+                    {yesNoOptions.map(o => <option key={o}>{o}</option>)}
+                  </select>
                 </FormField>
               </div>
 

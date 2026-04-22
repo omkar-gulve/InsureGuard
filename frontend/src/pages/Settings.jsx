@@ -3,9 +3,10 @@ import toast from 'react-hot-toast';
 import { useTheme } from '../context/ThemeContext';
 import {
   Sun, Moon, Monitor, Shield, Bell, Sliders, Globe,
-  Save, CheckCircle, AlertCircle, RefreshCw, Wifi, Database, Trash2
+  Save, CheckCircle, AlertCircle, RefreshCw, Wifi, Database, Trash2, Calendar
 } from 'lucide-react';
-import { clearClaims } from '../services/api';
+import { clearClaims, seedClaims, deleteClaimsByDateRange } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 // ── Helpers ──────────────────────────────────────────────────
 const Toggle = ({ checked, onChange }) => (
@@ -43,6 +44,11 @@ const Row = ({ label, description, children }) => (
 // ── Main Settings Component ───────────────────────────────────
 const Settings = () => {
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // App config state (stored in localStorage)
   const [config, setConfig] = useState(() => ({
@@ -290,6 +296,95 @@ const Settings = () => {
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             <Trash2 className="h-3.5 w-3.5" /> Clear Data
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between py-3 border-t border-dashed" style={{ borderColor: 'var(--border)' }}>
+          <div className="mr-4">
+            <p className="text-sm font-medium" style={{ color: 'var(--text-1)' }}>Seed Sample Data</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>Populate the database with historical claims for testing</p>
+          </div>
+          <button
+            onClick={async () => {
+              if (window.confirm('This will add 15 sample claims from Jan-Mar 2026 to your database. Continue?')) {
+                const loadingToast = toast.loading('Seeding data...');
+                try {
+                  const res = await seedClaims();
+                  toast.dismiss(loadingToast);
+                  toast.success(res.data.detail || 'Data seeded successfully!');
+                } catch (e) {
+                  toast.dismiss(loadingToast);
+                  toast.error(e.response?.data?.detail || 'Failed to seed data.');
+                }
+              }
+            }}
+            disabled={!isAdmin}
+            className="btn-outline"
+            style={{ color: 'var(--primary)', borderColor: 'rgba(37,99,235,0.3)', gap: 6, opacity: isAdmin ? 1 : 0.5 }}
+          >
+            <RefreshCw className="h-3.5 w-3.5" /> Seed Data
+          </button>
+        </div>
+
+        {/* Date-based deletion tool */}
+        <div className="mt-4 pt-4 border-t border-dashed" style={{ borderColor: 'var(--border)' }}>
+          <p className="text-sm font-semibold mb-1 flex items-center gap-2" style={{ color: 'var(--text-1)' }}>
+            <Calendar className="h-4 w-4" style={{ color: 'var(--primary)' }} />
+            Delete Activity History
+          </p>
+          <p className="text-[11px] mb-3" style={{ color: 'var(--text-3)' }}>
+            {isAdmin 
+              ? "Administrators can delete data across all agents within a range." 
+              : "Permanently delete your own recorded claims within the selected range."}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div>
+              <label className="text-[10px] font-bold uppercase mb-1 block" style={{ color: 'var(--text-3)' }}>Start Date</label>
+              <input 
+                type="date" 
+                value={dateRange.start} 
+                onChange={e => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                className="form-input w-full"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold uppercase mb-1 block" style={{ color: 'var(--text-3)' }}>End Date</label>
+              <input 
+                type="date" 
+                value={dateRange.end} 
+                onChange={e => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                className="form-input w-full"
+              />
+            </div>
+          </div>
+          <button
+            disabled={!dateRange.start || !dateRange.end || isDeleting}
+            onClick={async () => {
+              const confirmMsg = isAdmin 
+                ? `Are you sure you want to delete ALL claims from ${dateRange.start} to ${dateRange.end}?`
+                : `Are you sure you want to delete YOUR claims from ${dateRange.start} to ${dateRange.end}?`;
+                
+              if (window.confirm(`${confirmMsg} This action is permanent.`)) {
+                setIsDeleting(true);
+                const loadingToast = toast.loading('Deleting records...');
+                try {
+                  const response = await deleteClaimsByDateRange(dateRange.start, dateRange.end);
+                  toast.dismiss(loadingToast);
+                  toast.success(response.data.detail || 'Records deleted successfully!');
+                  setDateRange({ start: '', end: '' });
+                } catch (err) {
+                  toast.dismiss(loadingToast);
+                  toast.error(err.response?.data?.detail || 'Failed to delete records.');
+                } finally {
+                  setIsDeleting(false);
+                }
+              }
+            }}
+            className="btn-outline w-full"
+            style={{ color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)', gap: 6 }}
+          >
+            {isDeleting ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+            Delete Records in Range
           </button>
         </div>
       </Section>

@@ -15,6 +15,33 @@ class UserResponse(BaseModel):
     username: str
     email: str
     role: RoleEnum
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    profile_image_url: Optional[str] = None
+
+class UserUpdateResponse(BaseModel):
+    username: str
+    email: str
+    role: RoleEnum
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    profile_image_url: Optional[str] = None
+    class Config:
+        from_attributes = True
+
+class UserWithStats(UserResponse):
+    claims_count: int
+    created_at: Optional[datetime.datetime] = None
     class Config:
         from_attributes = True
 
@@ -45,7 +72,9 @@ class ClaimResponse(BaseModel):
 
 # ML Predict schemas
 class FraudFeatureInput(BaseModel):
+    incident_type: str
     incident_severity: str
+    property_damage: str          # YES / NO / ?
     total_claim_amount: float
     months_as_customer: int
     police_report_available: str

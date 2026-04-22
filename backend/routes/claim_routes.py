@@ -5,6 +5,8 @@ from database import get_db
 import models
 import schemas
 from auth import get_current_user
+import datetime
+from seed_claims import seed_data
 
 router = APIRouter(prefix="/claims", tags=["Claims"])
 
@@ -69,3 +71,42 @@ def delete_all_claims(
         db.query(models.Claim).filter(models.Claim.agent_id == current_user.id).delete()
     db.commit()
     return {"detail": "Claims history cleaned successfully"}
+
+@router.delete("/by-date")
+def delete_claims_by_range(
+    start_date: datetime.datetime,
+    end_date: datetime.datetime,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # Ensure end_date includes the entire day by setting it to the last second
+    actual_end_date = end_date.replace(hour=23, minute=59, second=59)
+    
+    query = db.query(models.Claim).filter(
+        models.Claim.created_at >= start_date,
+        models.Claim.created_at <= actual_end_date
+    )
+    
+    if current_user.role != models.RoleEnum.admin:
+        # If not admin, restrict to own claims
+        query = query.filter(models.Claim.agent_id == current_user.id)
+    
+    deleted_count = query.delete(synchronize_session=False)
+    db.commit()
+    
+    return {"detail": f"Successfully deleted {deleted_count} claims within specified range"}
+
+@router.post("/seed")
+def seed_claims_history(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # Only Admin can seed data for now to avoid spam
+    if current_user.role != models.RoleEnum.admin:
+        raise HTTPException(status_code=403, detail="Only administrators can seed data")
+        
+    success = seed_data(db)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to seed data. Check if users exist.")
+        
+    return {"detail": "Successfully seeded historical claim data (Jan-Mar 2026)"}

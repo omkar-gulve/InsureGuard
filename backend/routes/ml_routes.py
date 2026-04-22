@@ -4,6 +4,7 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 import schemas
+import ml_utils
 from auth import get_current_user
 
 router = APIRouter(prefix="/predict", tags=["Predictions"])
@@ -16,6 +17,10 @@ fraud_model = None
 premium_model = None
 
 try:
+    import __main__
+    import ml_utils
+    __main__.to_dense_array = ml_utils.to_dense_array
+
     if os.path.exists(fraud_model_path):
         fraud_model = joblib.load(fraud_model_path)
     if os.path.exists(premium_model_path):

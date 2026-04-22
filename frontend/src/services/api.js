@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
 });
 
 api.interceptors.request.use(
@@ -38,11 +38,20 @@ export const login = (username, password) => {
 
 export const register = (data) => api.post('/auth/register', data);
 export const getMe = () => api.get('/auth/me');
+export const updateProfile = (data) => api.put('/auth/me', data);
+export const getAllUsers = () => api.get('/auth/members');
+export const updateUser = (id, data) => api.put(`/auth/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/auth/users/${id}`);
 
 // Claims API
 export const getClaims = () => api.get('/claims/');
 export const createClaim = (data) => api.post('/claims/', data);
 export const clearClaims = () => api.delete('/claims/');
+export const seedClaims = () => api.post('/claims/seed');
+export const deleteClaimsByDateRange = (startDate, endDate) => 
+  api.delete('/claims/by-date', {
+    params: { start_date: startDate, end_date: endDate }
+  });
 
 // ML Predictions
 export const predictFraud = (data) => api.post('/predict/fraud', data);

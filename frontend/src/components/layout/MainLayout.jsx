@@ -8,6 +8,7 @@ import {
   ClipboardList, HelpCircle, Download, Menu, ChevronRight,
   Monitor, Crown, Users
 } from 'lucide-react';
+import ProfileDashboardModal from './ProfileDashboardModal';
 
 const MainLayout = () => {
   const { user, logout } = useAuth();
@@ -15,6 +16,7 @@ const MainLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate('/login'); };
   const isDark = theme === 'dark';
@@ -39,6 +41,7 @@ const MainLayout = () => {
     '/predict-premium': 'Premium Estimator',
     '/claims': 'Claims History',
     '/reports': 'Reports',
+    '/user-management': 'User Management',
     '/settings': 'Settings',
   };
 
@@ -86,7 +89,7 @@ const MainLayout = () => {
         {user?.role === 'admin' && (
           <>
             <p className="section-label" style={{ color: 'var(--warning)' }}>Admin</p>
-            <NavLink item={{ name: 'User Management', path: '/settings', icon: Users }} />
+            <NavLink item={{ name: 'User Management', path: '/user-management', icon: Users }} />
           </>
         )}
 
@@ -131,8 +134,9 @@ const MainLayout = () => {
         {/* User profile */}
         {user && (
           <div
-            className="flex items-center gap-3 p-2.5 rounded-xl cursor-default group"
+            className="flex items-center gap-3 p-2.5 rounded-xl cursor-pointer group hover:bg-white/5 transition-colors"
             style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}
+            onClick={() => setIsProfileOpen(true)}
           >
             <div
               className="h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 relative"
@@ -157,7 +161,7 @@ const MainLayout = () => {
               <p className="text-[10px] capitalize" style={{ color: 'var(--text-3)' }}>{user.role}</p>
             </div>
             <button
-              onClick={handleLogout}
+              onClick={(e) => { e.stopPropagation(); handleLogout(); }}
               title="Logout"
               className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
               style={{ color: 'var(--text-3)' }}
@@ -260,6 +264,9 @@ const MainLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Slide-over Panels */}
+      <ProfileDashboardModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </div>
   );
 };

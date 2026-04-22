@@ -30,15 +30,32 @@ const mockPremiumData = [
 ];
 
 const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl p-3 text-xs shadow-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-      <p className="font-semibold mb-1" style={{ color: 'var(--text-1)' }}>{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>{p.name}: <strong>{p.value}</strong></p>
-      ))}
-    </div>
-  );
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-xl p-3 text-xs shadow-2xl animate-scale-in" 
+        style={{ 
+          background: 'var(--surface)', 
+          backdropFilter: 'blur(12px)',
+          border: '1px solid var(--border-strong)',
+          boxShadow: '0 12px 30px -10px rgba(0, 0, 0, 0.4)',
+          minWidth: 140
+        }}>
+        <p className="font-bold mb-2 pb-1.5" style={{ color: 'var(--text-1)', borderBottom: '1px solid var(--border)' }}>{label}</p>
+        <div className="space-y-1.5">
+          {payload.map((p, i) => (
+            <div key={i} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+                <span style={{ color: 'var(--text-2)', fontWeight: 500 }}>{p.name}:</span>
+              </div>
+              <span className="font-bold" style={{ color: 'var(--text-1)' }}>{p.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
 };
 
 const KpiCard = ({ label, value, trend, icon: Icon, iconColor, iconBg }) => (
@@ -117,7 +134,7 @@ const Reports = () => {
               <CartesianGrid strokeDasharray="4 4" stroke={gridLineColor} vertical={false} />
               <XAxis dataKey="month" tick={{ fill: axisTickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: axisTickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
               <Bar dataKey="total" name="Total Claims" fill={isDark ? 'rgba(59,130,246,0.2)' : 'rgba(37,99,235,0.1)'} radius={[4, 4, 0, 0]} />
               <Bar dataKey="fraudRate" name="Fraud Cases" fill="var(--danger)" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -164,7 +181,7 @@ const Reports = () => {
               <CartesianGrid strokeDasharray="4 4" stroke={gridLineColor} vertical={false} />
               <XAxis dataKey="range" tick={{ fill: axisTickColor, fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: axisTickColor, fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
               <Bar dataKey="count" name="Claims" fill="var(--primary)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -185,7 +202,7 @@ const Reports = () => {
               <CartesianGrid strokeDasharray="4 4" stroke={gridLineColor} vertical={false} />
               <XAxis dataKey="month" tick={{ fill: axisTickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: axisTickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} />
               <Area type="monotone" dataKey="fraudRate" name="Fraud Cases" stroke="var(--danger)" fill="url(#gFraudR)" strokeWidth={2.5}
                 dot={{ r: 3, fill: 'var(--surface)', strokeWidth: 2, stroke: '#EF4444' }}
                 activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2 }} />
