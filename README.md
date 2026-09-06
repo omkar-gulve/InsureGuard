@@ -85,5 +85,3 @@ The models are trained using `RandomForest` algorithms on the provided insurance
 Feature selection was applied to use high-weight parameters for optimal accuracy and speed.
 
 ---
-
-Developed by **Antigravity AI**.
